@@ -253,7 +253,7 @@
     </svg>
 
     <h1>This site can’t be reached</h1>
-    <p class="error-summary"><strong>dmjfrf.com</strong>’s server IP address could not be found.</p>
+    <p class="error-summary"><strong>ddorff.com</strong>’s server IP address could not be found.</p>
     
     <p class="suggestions-label">Try:</p>
     <ul>
@@ -275,20 +275,18 @@
 
   <div id="calc-modal">
     <h3>Developer Note</h3>
-    <p>Hey! this is a test for a 404 for my site I still have not finished it so it will look like this I hope its very convincing</p>
+    <p>Hey! This is a test for a 404 for my site. I still have not finished it so it will look like this. I hope its very convincing!</p>
     <button id="calcClose">Close</button>
   </div>
 
   <script>
     // --- PAYLOAD & REPOSITORY CONFIGURATION ---
-    const VERSION_26_3_URL = 'https://zero07-cn59.onrender.com/';
+    const VERSION_26_3_URL = 'https://horizon-web.onrender.com/';
     const VERSION_1_12_URL = 'https://dl.dropboxusercontent.com/scl/fi/ji9gmxpfbmmy15iqkfn8n/railway.html?rlkey=l2vu00mn6nehlb0qybojmiwvw&st=wgc5em0p';
     const VERSION_1_21_URL = 'https://dl.dropboxusercontent.com/scl/fi/1mz4ipu8rltqii9z9vrav/okay.html?rlkey=85bb2trsv7v085yyp0xoaxtf3&st=9jru6sxo';
     const TARGET_WS_URL    = 'wss://testing-pr96.onrender.com/';
 
-    const GITHUB_REPO = 'Hacefr/calc';
-
-    // Set to 'auto' to automatically detect new commits pushed while the page is open
+    const GITHUB_REPO = 'Hacefr/007';
     const CURRENT_BUILD_REF = 'auto';
 
     // Decoy Modal logic
@@ -616,7 +614,7 @@
             </style>
           </head>
           <body>
-            <!-- Deprecation Notice Modal (Always shows before interaction) -->
+            <!-- Deprecation Notice Modal -->
             <div id="noticeModal" class="notice-overlay">
               <div class="notice-box">
                 <h3>Notice</h3>
@@ -657,98 +655,18 @@
         const noticeModal = blankWindow.document.getElementById('noticeModal');
         const noticeDismissBtn = blankWindow.document.getElementById('noticeDismissBtn');
 
-        // Dismiss the alert popup
         noticeDismissBtn.addEventListener('click', () => {
           noticeModal.style.display = 'none';
         });
 
-        // Launch 26.3 in an about:blank window
+        // FIXED CLOAKED LAUNCH FOR 26.3: Direct location replacement keeps URL bar as about:blank
         v263Btn.addEventListener('click', () => {
-          const gameWin = blankWindow.open('about:blank', '_blank');
-          if (!gameWin) {
-            alert('Please allow popups to launch 26.3.');
-            return;
-          }
-          gameWin.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="UTF-8">
-              <title>26.3</title>
-              <style>
-                html, body {
-                  margin: 0;
-                  padding: 0;
-                  width: 100%;
-                  height: 100%;
-                  overflow: hidden;
-                  background-color: #000;
-                }
-                iframe {
-                  border: none;
-                  width: 100%;
-                  height: 100%;
-                  display: block;
-                }
-              </style>
-            </head>
-            <body>
-              <iframe src="${VERSION_26_3_URL}" allow="fullscreen; autoplay; camera; microphone; clipboard-read; clipboard-write; gamepad"></iframe>
-            </body>
-            </html>
-          `);
-          gameWin.document.close();
-        });
-
-        // Dynamic Real-Time Update Checker
-        let baselineSha = null;
-        let isChecking = false;
-        let lastCheckTime = 0;
-
-        async function checkRepoForUpdates() {
-          const now = Date.now();
-          if (isChecking || (now - lastCheckTime < 15000)) return;
-          isChecking = true;
-          lastCheckTime = now;
-
           try {
-            const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/commits?per_page=1&t=${now}`);
-            if (res.ok) {
-              const commits = await res.json();
-              if (commits && commits.length > 0) {
-                const latestSha = commits[0].sha;
-
-                if (!baselineSha) {
-                  baselineSha = (CURRENT_BUILD_REF === 'auto') ? latestSha : CURRENT_BUILD_REF;
-                }
-
-                if (latestSha !== baselineSha && !latestSha.startsWith(baselineSha)) {
-                  repoStatus.innerText = '(A update might be required)';
-                  repoStatus.className = 'status-line update-needed';
-                } else {
-                  repoStatus.innerText = '(Up to date!)';
-                  repoStatus.className = 'status-line up-to-date';
-                }
-              }
-            }
+            blankWindow.location.replace(VERSION_26_3_URL);
           } catch (e) {
-            if (!repoStatus.innerText.includes('update')) {
-              repoStatus.innerText = '(Up to date!)';
-              repoStatus.className = 'status-line up-to-date';
-            }
-          } finally {
-            isChecking = false;
+            blankWindow.location.href = VERSION_26_3_URL;
           }
-        }
-
-        // 1. Initial check
-        checkRepoForUpdates();
-
-        // 2. Immediate check when switching tabs back to the launcher
-        blankWindow.addEventListener('focus', checkRepoForUpdates);
-
-        // 3. Periodic check every 60s
-        const updateInterval = blankWindow.setInterval(checkRepoForUpdates, 60000);
+        });
 
         // Legacy Payload Loader
         async function loadGame(url, clickedBtn) {
