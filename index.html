@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <title>ddorff.com</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: #202124;
+      color: #9aa0a6;
+      font-family: "Segoe UI", Tahoma, sans-serif, -apple-system, BlinkMacSystemFont, Roboto;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      padding: 24px;
+      user-select: none;
+    }
+
+    #page-container {
+      width: 100%;
+      max-width: 580px;
+    }
+
+    /* Chrome Sad Page Icon */
+    .chrome-icon {
+      width: 44px;
+      height: 44px;
+      margin-bottom: 24px;
+      fill: none;
+      stroke: #9aa0a6;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    h1 {
+      font-size: 1.55rem;
+      font-weight: 500;
+      color: #e8eaed;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .error-summary {
+      font-size: 0.92rem;
+      color: #9aa0a6;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .error-summary strong {
+      color: #e8eaed;
+      font-weight: 600;
+    }
+
+    .suggestions-label {
+      font-size: 0.92rem;
+      margin-bottom: 8px;
+      color: #9aa0a6;
+    }
+
+    ul {
+      margin-left: 20px;
+      margin-bottom: 24px;
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+
+    ul li {
+      color: #9aa0a6;
+    }
+
+    .fake-link {
+      color: #8ab4f8;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .fake-link:hover {
+      text-decoration: underline;
+    }
+
+    .error-code {
+      font-size: 0.75rem;
+      color: #9aa0a6;
+      text-transform: uppercase;
+      margin-bottom: 36px;
+      letter-spacing: 0.02em;
+    }
+
+    /* Bottom Action Buttons */
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .decoy-btn {
+      background-color: transparent;
+      color: #8ab4f8;
+      border: 1px solid #5f6368;
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.15s, border-color 0.15s;
+    }
+
+    .decoy-btn:hover {
+      background-color: rgba(138, 180, 248, 0.08);
+      border-color: #8ab4f8;
+    }
+
+    .decoy-btn.reload-btn {
+      background-color: #8ab4f8;
+      border: 1px solid transparent;
+      color: #202124;
+      font-weight: 600;
+      padding: 8px 24px;
+    }
+
+    .decoy-btn.reload-btn:hover {
+      background-color: #93bbf8;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Secret ? Trigger (Bottom Left) */
+    #secret-btn {
+      position: fixed;
+      bottom: 12px;
+      left: 12px;
+      width: 22px;
+      height: 22px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #3c4043;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    #secret-btn:hover {
+      color: #9aa0a6;
+      border-color: #3c4043;
+    }
+
+    /* Unlocked . Trigger (Top Right) */
+    #dot-btn {
+      display: none;
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      width: 22px;
+      height: 22px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #3c4043;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    #dot-btn.unlocked {
+      display: flex;
+    }
+    #dot-btn:hover {
+      color: #9aa0a6;
+      border-color: #3c4043;
+    }
+
+    @keyframes discrete-pulse {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.8; }
+    }
+    .loading-state {
+      animation: discrete-pulse 1.2s infinite ease-in-out;
+      cursor: default !important;
+      color: #8ab4f8 !important;
+    }
+
+    /* Decoy Modal */
+    #calc-modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #292a2d;
+      color: #e8eaed;
+      padding: 24px;
+      border-radius: 8px;
+      border: 1px solid #3c4043;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      font-family: inherit;
+      z-index: 10;
+      width: 90%;
+      max-width: 380px;
+    }
+
+    #calc-modal h3 {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #e8eaed;
+      margin-bottom: 12px;
+    }
+
+    #calc-modal p {
+      font-size: 0.88rem;
+      color: #bdc1c6;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    #calcClose {
+      display: block;
+      margin-left: auto;
+      background: #8ab4f8;
+      border: none;
+      color: #202124;
+      font-weight: 600;
+      padding: 6px 18px;
+      border-radius: 100px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #calcClose:hover { background: #93bbf8; }
+  </style>
+</head>
+<body>
+
+  <div id="page-container">
+    <svg class="chrome-icon" viewBox="0 0 44 44">
+      <path d="M7 4h20l10 10v26H7V4z"></path>
+      <path d="M27 4v10h10"></path>
+      <line x1="14" y1="18" x2="16" y2="18"></line>
+      <line x1="28" y1="18" x2="30" y2="18"></line>
+      <path d="M15 28c1.5-2 3.5-3 7-3s5.5 1 7 3"></path>
+    </svg>
+
+    <h1>This site can’t be reached</h1>
+    <p class="error-summary"><strong>dmjfrf.com</strong>’s server IP address could not be found.</p>
+    
+    <p class="suggestions-label">Try:</p>
+    <ul>
+      <li>Checking the connection</li>
+      <li><span class="fake-link">Checking the proxy, firewall, and DNS configuration</span></li>
+      <li><span class="fake-link">Running Connectivity Diagnostics</span></li>
+    </ul>
+
+    <div class="error-code">ERR_NAME_NOT_RESOLVED</div>
+
+    <div class="button-group">
+      <button class="decoy-btn" id="testRawBtn">Details</button>
+      <button class="decoy-btn reload-btn" onclick="window.location.reload()">Reload</button>
+    </div>
+  </div>
+
+  <button id="secret-btn" title="Help">?</button>
+  <button id="dot-btn" title="Status">·</button>
+
+  <div id="calc-modal">
+    <h3>Developer Note</h3>
+    <p>Hey! this is a test for a 404 for my site I still have not finished it so it will look like this I hope its very convincing</p>
+    <button id="calcClose">Close</button>
+  </div>
+
+  <script>
+    // --- PAYLOAD & REPOSITORY CONFIGURATION ---
+    const VERSION_26_3_URL = 'https://zero07-cn59.onrender.com/';
+    const VERSION_1_12_URL = 'https://dl.dropboxusercontent.com/scl/fi/ji9gmxpfbmmy15iqkfn8n/railway.html?rlkey=l2vu00mn6nehlb0qybojmiwvw&st=wgc5em0p';
+    const VERSION_1_21_URL = 'https://dl.dropboxusercontent.com/scl/fi/1mz4ipu8rltqii9z9vrav/okay.html?rlkey=85bb2trsv7v085yyp0xoaxtf3&st=9jru6sxo';
+    const RAILWAY_WS_URL   = 'wss://eaglercraft-shockbyte-gateway-production.up.railway.app';
+
+    const GITHUB_REPO = 'Hacefr/calc';
+
+    // Set to 'auto' to automatically detect new commits pushed while the page is open
+    const CURRENT_BUILD_REF = 'auto';
+
+    // Decoy Modal logic
+    const calcModal = document.getElementById('calc-modal');
+    document.getElementById('testRawBtn').addEventListener('click', () => { calcModal.style.display = 'block'; });
+    document.getElementById('calcClose').addEventListener('click', () => { calcModal.style.display = 'none'; });
+
+    // Secret Toggle (? reveals .)
+    const secretBtn = document.getElementById('secret-btn');
+    const dotBtn = document.getElementById('dot-btn');
+    secretBtn.addEventListener('click', () => { dotBtn.classList.toggle('unlocked'); });
+
+    // Launcher Logic
+    let isFetching = false;
+
+    dotBtn.addEventListener('click', async () => {
+      if (isFetching) return;
+      isFetching = true;
+      dotBtn.classList.add('loading-state');
+
+      const isDebugMode = window.location.hash.length > 0;
+
+      const blankWindow = window.open('about:blank', '_blank');
+      const checkWindow = window.open('about:blank', '_blank');
+
+      if (!blankWindow || !checkWindow) {
+        alert('Please allow popups so connection channels can launch.');
+        isFetching = false;
+        dotBtn.classList.remove('loading-state');
+        return;
+      }
+
+      // Step 1: Initial Fake Error in target window
+      blankWindow.document.write('<p style="font-family:monospace;color:#5f6368;padding:24px;font-size:13px;letter-spacing:0.02em;">ERR_NO_URL_FOUND</p>');
+
+      // Step 2: Diagnostics window runs WebSocket handshake
+      checkWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Network Diagnostics ${isDebugMode ? '[DEBUG MODE]' : ''}</title>
+          <style>
+            body { background: #202124; color: #9aa0a6; font-family: system-ui, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+            .card { background: #292a2d; padding: 24px; border-radius: 8px; border: 1px solid #3c4043; width: 100%; max-width: 460px; text-align: left; }
+            h3 { color: #e8eaed; margin: 0 0 12px 0; font-size: 1rem; font-weight: 500; }
+            p { font-size: 0.85rem; margin-bottom: 16px; line-height: 1.4; color: #bdc1c6; }
+            .bar-bg { background: #3c4043; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 16px; }
+            .bar-fill { background: #8ab4f8; height: 100%; width: 20%; transition: width 0.3s ease; }
+            .log-box { background: #171717; border: 1px solid #3c4043; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 11px; height: 140px; overflow-y: auto; color: #8ab4f8; line-height: 1.5; margin-bottom: 16px; }
+            .log-entry { margin-bottom: 4px; word-break: break-all; }
+            .log-time { color: #5f6368; }
+            .log-success { color: #81c995; }
+            .log-err { color: #f28b82; }
+            .retry-btn { background-color: #8ab4f8; color: #202124; border: none; padding: 8px 18px; border-radius: 100px; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: none; width: 100%; transition: background 0.15s; }
+            .retry-btn:hover { background-color: #93bbf8; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <h3>Establishing Server Route...</h3>
+            <p id="st">Warming up firewall inspection layer...</p>
+            <div class="bar-bg"><div id="bf" class="bar-fill"></div></div>
+            <div id="logs" class="log-box"></div>
+            <button id="retryBtn" class="retry-btn">Reattempt Connection</button>
+          </div>
+          <script>
+            const wsUrl = "${RAILWAY_WS_URL}";
+            const isDebug = ${isDebugMode};
+            const st = document.getElementById('st');
+            const bf = document.getElementById('bf');
+            const logs = document.getElementById('logs');
+            const retryBtn = document.getElementById('retryBtn');
+
+            let attempts = 0;
+            const MAX_ATTEMPTS = 3;
+            let ghostSocket = null;
+            let timer = null;
+            let startTime = performance.now();
+
+            function log(msg, type = '') {
+              const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+              const entry = document.createElement('div');
+              entry.className = 'log-entry ' + type;
+              entry.innerHTML = '<span class="log-time">[' + elapsed + 's]</span> ' + msg;
+              logs.appendChild(entry);
+              logs.scrollTop = logs.scrollHeight;
+            }
+
+            function update(pct, text) {
+              bf.style.width = pct + '%';
+              st.innerText = text;
+            }
+
+            function startHandshake() {
+              attempts = 0;
+              startTime = performance.now();
+              logs.innerHTML = '';
+              retryBtn.style.display = 'none';
+              log("Target WebSocket: " + wsUrl);
+              tryConnect();
+            }
+
+            function tryConnect() {
+              attempts++;
+              log("Handshake attempt " + attempts + " of " + MAX_ATTEMPTS + "...");
+              update(30 + (attempts * 15), "Connecting (Attempt " + attempts + "/" + MAX_ATTEMPTS + ")...");
+
+              ghostSocket = new WebSocket(wsUrl);
+
+              timer = setTimeout(() => {
+                ghostSocket.close();
+                log("Attempt " + attempts + " timed out.", "log-err");
+                handleFailure();
+              }, 4000);
+
+              ghostSocket.onopen = () => {
+                const pingTime = ((performance.now() - startTime)).toFixed(0);
+                log("SUCCESS: Route verified! Latency: " + pingTime + "ms", "log-success");
+                update(85, "Route verified! Handshake accepted.");
+                
+                setTimeout(() => {
+                  ghostSocket.close();
+                  clearTimeout(timer);
+                  update(100, "Route cleared!");
+                  retryBtn.style.display = 'block';
+                  if (!isDebug) setTimeout(() => window.close(), 500);
+                }, 400);
+              };
+
+              ghostSocket.onerror = () => {
+                clearTimeout(timer);
+                log("Attempt " + attempts + " failed or intercepted.", "log-err");
+                handleFailure();
+              };
+            }
+
+            function handleFailure() {
+              if (attempts < MAX_ATTEMPTS) {
+                setTimeout(tryConnect, 1000);
+              } else {
+                update(100, "Connection check finished.");
+                retryBtn.style.display = 'block';
+                if (!isDebug) setTimeout(() => window.close(), 1500);
+              }
+            }
+
+            retryBtn.addEventListener('click', startHandshake);
+            startHandshake();
+          <\/script>
+        </body>
+        </html>
+      `);
+      checkWindow.document.close();
+
+      // Step 3: Transition blankWindow to the Version Selection Screen
+      setTimeout(() => {
+        blankWindow.document.open();
+        blankWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>Select Version</title>
+            <style>
+              * { box-sizing: border-box; margin: 0; padding: 0; }
+              body {
+                background-color: #121212;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                user-select: none;
+              }
+              .version-card {
+                background-color: #1c1c1c;
+                border-radius: 12px;
+                padding: 38px 36px 30px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+                width: 100%;
+                max-width: 520px;
+              }
+              h2 {
+                color: #ffffff;
+                font-size: 1.65rem;
+                font-weight: 700;
+                margin-bottom: 24px;
+                letter-spacing: -0.02em;
+              }
+              .main-btn-wrap {
+                margin-bottom: 20px;
+              }
+              .v-btn-primary {
+                width: 100%;
+                border: none;
+                padding: 15px 24px;
+                border-radius: 8px;
+                font-size: 1.15rem;
+                font-weight: 700;
+                cursor: pointer;
+                background-color: #1e8e3e;
+                color: #ffffff;
+                transition: transform 0.1s ease, background-color 0.15s ease;
+                font-family: inherit;
+              }
+              .v-btn-primary:hover {
+                background-color: #27a248;
+              }
+              .v-btn-primary:active {
+                transform: scale(0.98);
+              }
+              .legacy-section {
+                border-top: 1px solid #2e2e2e;
+                margin-top: 22px;
+                padding-top: 18px;
+              }
+              .legacy-label {
+                font-size: 0.76rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: #5f6368;
+                margin-bottom: 12px;
+              }
+              .legacy-row {
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+                align-items: center;
+              }
+              .legacy-link {
+                background: none;
+                border: none;
+                color: #70757a;
+                font-size: 0.83rem;
+                cursor: pointer;
+                text-decoration: underline;
+                font-family: inherit;
+                padding: 4px 8px;
+                border-radius: 4px;
+                transition: color 0.15s ease;
+              }
+              .legacy-link:hover {
+                color: #9aa0a6;
+              }
+              .legacy-divider {
+                color: #3c4043;
+                font-size: 0.8rem;
+              }
+              .status-line {
+                margin-top: 20px;
+                font-size: 0.84rem;
+                font-weight: 500;
+                color: #80868b;
+                letter-spacing: 0.01em;
+                transition: color 0.3s ease;
+              }
+              .status-line.up-to-date {
+                color: #81c995;
+              }
+              .status-line.update-needed {
+                color: #fdd663;
+              }
+              .loading-msg {
+                margin-top: 14px;
+                color: #8ab4f8;
+                font-size: 0.85rem;
+                display: none;
+              }
+
+              /* Deprecation Notice Modal */
+              .notice-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.78);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                padding: 20px;
+              }
+              .notice-box {
+                background: #252629;
+                border: 1px solid #3c4043;
+                border-radius: 12px;
+                padding: 26px;
+                max-width: 440px;
+                width: 100%;
+                box-shadow: 0 16px 36px rgba(0,0,0,0.7);
+                text-align: left;
+              }
+              .notice-box h3 {
+                color: #fdd663;
+                font-size: 1.05rem;
+                margin-bottom: 12px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              }
+              .notice-box p {
+                color: #bdc1c6;
+                font-size: 0.92rem;
+                line-height: 1.5;
+                margin-bottom: 22px;
+              }
+              .notice-box button {
+                float: right;
+                background-color: #8ab4f8;
+                color: #202124;
+                border: none;
+                font-weight: 600;
+                font-size: 0.86rem;
+                padding: 8px 22px;
+                border-radius: 100px;
+                cursor: pointer;
+                transition: background 0.15s;
+              }
+              .notice-box button:hover {
+                background-color: #93bbf8;
+              }
+            </style>
+          </head>
+          <body>
+            <!-- Deprecation Notice Modal (Always shows before interaction) -->
+            <div id="noticeModal" class="notice-overlay">
+              <div class="notice-box">
+                <h3>Notice</h3>
+                <p>1.12.2 and 26.2 will no longer be supported by 11/6/26 we have moved to 26.3 much better than those old ones feel free to move your data beforehand</p>
+                <button id="noticeDismissBtn">Understood</button>
+              </div>
+            </div>
+
+            <div class="version-card">
+              <h2>Select Your Version</h2>
+              
+              <div class="main-btn-wrap">
+                <button class="v-btn-primary" id="v263">Launch 26.3</button>
+              </div>
+
+              <div class="legacy-section">
+                <div class="legacy-label">Legacy Versions</div>
+                <div class="legacy-row">
+                  <button class="legacy-link" id="v112">1.12.2</button>
+                  <span class="legacy-divider">|</span>
+                  <button class="legacy-link" id="v121">26.2 (1.21.6)</button>
+                </div>
+              </div>
+
+              <div id="repoStatus" class="status-line">Checking repository...</div>
+              <p id="loadStatus" class="loading-msg">Fetching client assets...</p>
+            </div>
+          </body>
+          </html>
+        `);
+        blankWindow.document.close();
+
+        const v263Btn = blankWindow.document.getElementById('v263');
+        const v112Btn = blankWindow.document.getElementById('v112');
+        const v121Btn = blankWindow.document.getElementById('v121');
+        const repoStatus = blankWindow.document.getElementById('repoStatus');
+        const statusMsg = blankWindow.document.getElementById('loadStatus');
+        const noticeModal = blankWindow.document.getElementById('noticeModal');
+        const noticeDismissBtn = blankWindow.document.getElementById('noticeDismissBtn');
+
+        // Dismiss the alert popup
+        noticeDismissBtn.addEventListener('click', () => {
+          noticeModal.style.display = 'none';
+        });
+
+        // Launch 26.3 in an about:blank window
+        v263Btn.addEventListener('click', () => {
+          const gameWin = blankWindow.open('about:blank', '_blank');
+          if (!gameWin) {
+            alert('Please allow popups to launch 26.3.');
+            return;
+          }
+          gameWin.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <title>26.3</title>
+              <style>
+                html, body {
+                  margin: 0;
+                  padding: 0;
+                  width: 100%;
+                  height: 100%;
+                  overflow: hidden;
+                  background-color: #000;
+                }
+                iframe {
+                  border: none;
+                  width: 100%;
+                  height: 100%;
+                  display: block;
+                }
+              </style>
+            </head>
+            <body>
+              <iframe src="${VERSION_26_3_URL}" allow="fullscreen; autoplay; camera; microphone; clipboard-read; clipboard-write; gamepad"></iframe>
+            </body>
+            </html>
+          `);
+          gameWin.document.close();
+        });
+
+        // Dynamic Real-Time Update Checker
+        let baselineSha = null;
+        let isChecking = false;
+        let lastCheckTime = 0;
+
+        async function checkRepoForUpdates() {
+          const now = Date.now();
+          if (isChecking || (now - lastCheckTime < 15000)) return;
+          isChecking = true;
+          lastCheckTime = now;
+
+          try {
+            const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/commits?per_page=1&t=${now}`);
+            if (res.ok) {
+              const commits = await res.json();
+              if (commits && commits.length > 0) {
+                const latestSha = commits[0].sha;
+
+                if (!baselineSha) {
+                  baselineSha = (CURRENT_BUILD_REF === 'auto') ? latestSha : CURRENT_BUILD_REF;
+                }
+
+                if (latestSha !== baselineSha && !latestSha.startsWith(baselineSha)) {
+                  repoStatus.innerText = '(A update might be required)';
+                  repoStatus.className = 'status-line update-needed';
+                } else {
+                  repoStatus.innerText = '(Up to date!)';
+                  repoStatus.className = 'status-line up-to-date';
+                }
+              }
+            }
+          } catch (e) {
+            if (!repoStatus.innerText.includes('update')) {
+              repoStatus.innerText = '(Up to date!)';
+              repoStatus.className = 'status-line up-to-date';
+            }
+          } finally {
+            isChecking = false;
+          }
+        }
+
+        // 1. Initial check
+        checkRepoForUpdates();
+
+        // 2. Immediate check when switching tabs back to the launcher
+        blankWindow.addEventListener('focus', checkRepoForUpdates);
+
+        // 3. Periodic check every 60s
+        const updateInterval = blankWindow.setInterval(checkRepoForUpdates, 60000);
+
+        // Legacy Payload Loader
+        async function loadGame(url, clickedBtn) {
+          blankWindow.clearInterval(updateInterval);
+          blankWindow.removeEventListener('focus', checkRepoForUpdates);
+
+          v263Btn.disabled = true;
+          v112Btn.disabled = true;
+          v121Btn.disabled = true;
+          clickedBtn.innerText = 'Loading...';
+          statusMsg.style.display = 'block';
+
+          try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const html = await res.text();
+
+            blankWindow.document.open();
+            blankWindow.document.write(html);
+            blankWindow.document.close();
+          } catch (err) {
+            console.error('Game fetch failed:', err);
+            statusMsg.innerText = 'Failed to load assets. Please try again.';
+            statusMsg.style.color = '#f28b82';
+            v263Btn.disabled = false;
+            v112Btn.disabled = false;
+            v121Btn.disabled = false;
+            clickedBtn.innerText = clickedBtn.id === 'v112' ? '1.12.2' : '26.2 (1.21.6)';
+          }
+        }
+
+        v112Btn.addEventListener('click', () => loadGame(VERSION_1_12_URL, v112Btn));
+        v121Btn.addEventListener('click', () => loadGame(VERSION_1_21_URL, v121Btn));
+
+        isFetching = false;
+        dotBtn.classList.remove('loading-state');
+      }, 1200);
+    });
+  </script>
+</body>
+</html>
